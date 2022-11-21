@@ -68,7 +68,6 @@ jobs:
           load: true
           tags: ${{ env.IMAGE }}:test
         env:
-          version: ${{ steps.get_version.outputs.VERSION }}
           VERSION: ${{ steps.get_version.outputs.VERSION }}
 
       - name: Remove Docker Container
@@ -84,7 +83,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
         env:
-          version: ${{ steps.get_version.outputs.VERSION }}
           VERSION: ${{ steps.get_version.outputs.VERSION }}
 
       - name: Update repo description
