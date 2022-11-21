@@ -1,5 +1,6 @@
 FROM node:gallium-slim
 ENV VERSION 1.0.0
+ENV BRANCH unstable
 
 LABEL name="ArunaCore"
 LABEL version=$VERSION
@@ -29,22 +30,38 @@ ENV HOME=/home/arunacore
 RUN \
     apt-get update && \
     apt-get install --no-install-recommends -y \
-    git \
+    ca-certificates \
     unzip \
-    wget \
     curl
 
-# Install ArunaCore
-RUN \
-    git clone https://github.com/ArunaBot/ArunaCore $HOME/ArunaCore
+WORKDIR ${HOME}
+
+# Download ArunaCore
+RUN curl -L https://github.com/ArunaBot/ArunaCore/archive/refs/heads/${BRANCH}.zip -o arunacore.zip
+
+# Unzip ArunaCore
+RUN unzip arunacore.zip
+
+# Rename ArunaCore folder
+RUN mv ArunaCore-${BRANCH} ArunaCore
+
+# Delete ArunaCore.zip
+RUN rm arunacore.zip
+
+# Set the working directory to ArunaCore bundle
+WORKDIR ${HOME}/ArunaCore/bundle
+
+# Upgrade NPM
+RUN npm install -g npm@8.x
+
+# Setup ArunaCore
+RUN npm run cisetup
 
 # Set NODE_ENV to production
 ENV NODE_ENV=production
 
-# Set the working directory to ArunaCore bundle
-WORKDIR $HOME/ArunaCore
-
-RUN npm run setup
+# Run build cleanup tasks
+RUN npm run docker:cleanup
 
 # Expose the port
 EXPOSE 3000/tcp
