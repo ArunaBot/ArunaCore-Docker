@@ -1,0 +1,9 @@
+.git
+.github
+.gitmodules
+.dockerignore
+LICENSE
+README.md
+SECURITY.md
+Dockerfile
+docker-compose
