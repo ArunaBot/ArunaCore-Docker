@@ -36,13 +36,13 @@ RUN \
 
 # Install ArunaCore
 RUN \
-    git clone https://github.com/ArunaBot/ArunaCore $HOME
+    git clone https://github.com/ArunaBot/ArunaCore $HOME/ArunaCore
 
 # Set NODE_ENV to production
 ENV NODE_ENV=production
 
 # Set the working directory to ArunaCore bundle
-WORKDIR $HOME/bundle
+WORKDIR $HOME/ArunaCore
 
 RUN npm run setup
 
