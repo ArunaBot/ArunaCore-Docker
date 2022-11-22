@@ -38,9 +38,12 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Get latest arunacore version from npm
-        id: get_version
-        run: echo ::set-output name=VERSION::$(npm view @arunacore/arunacore version)
+      - name: Get latest arunacore version from github
+        id: latest_version
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          repository: ArunaBot/ArunaCore
+          excludes: draft
 
       - name: Docker meta
         id: meta
@@ -80,7 +83,7 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: latest, ${{ steps.meta.outputs.tags }}, ${{ env.VERSION }}
           labels: ${{ steps.meta.outputs.labels }}
         env:
           VERSION: ${{ steps.get_version.outputs.VERSION }}
