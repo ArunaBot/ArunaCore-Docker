@@ -45,6 +45,9 @@ jobs:
           repository: ArunaBot/ArunaCore
           excludes: draft
 
+      - name: Debug
+        run: echo ${{ steps.latest_version.outputs }}
+
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
