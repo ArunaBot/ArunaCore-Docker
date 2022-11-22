@@ -63,8 +63,14 @@ ENV NODE_ENV=production
 # Run build cleanup tasks
 RUN npm run docker:cleanup
 
+# Remove apt packages
+RUN apt-get remove -y unzip curl ca-certificates \
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && apt-get autoclean
+
 # Expose the port
 EXPOSE 3000/tcp
 
 # Run ArunaCore
-CMD ["npm", "start", "--ignore-scripts"]
+CMD ["npm", "start"]

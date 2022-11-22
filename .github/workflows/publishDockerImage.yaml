@@ -64,10 +64,7 @@ jobs:
         env:
           version: ${{ steps.get_version.outputs.release }}
 
-      - name: Debug
-        run: echo "${{ steps.get_version.outputs.release }}" && echo "${{ steps.meta.outputs.tags }}"
-
-      - name: Test Docker Image
+      - name: Generate Test Image
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -76,7 +73,7 @@ jobs:
         env:
           VERSION: ${{ steps.get_version.outputs.release }}
 
-      - name: Remove Docker Container
+      - name: Run Test Image
         run: |
           docker run --env FINISH_IN_SECONDS=10 --rm ${{ env.IMAGE }}:test
 
