@@ -39,14 +39,11 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Get latest arunacore version from github
-        id: latest_version
+        id: get_version
         uses: pozetroninc/github-action-get-latest-release@master
         with:
           repository: ArunaBot/ArunaCore
           excludes: draft
-
-      - name: Debug
-        run: echo ${{ steps.latest_version.outputs.release }}
 
       - name: Docker meta
         id: meta
@@ -66,6 +63,9 @@ jobs:
             type=sha
         env:
           version: ${{ steps.get_version.outputs.release }}
+
+      - name: Debug
+        run: echo "${{ steps.get_version.outputs.release }}" && echo "${{ steps.meta.outputs.tags }}"
 
       - name: Test Docker Image
         uses: docker/build-push-action@v3
