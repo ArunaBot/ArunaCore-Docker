@@ -46,7 +46,7 @@ jobs:
           excludes: draft
 
       - name: Debug
-        run: echo ${{ steps.latest_version.outputs }}
+        run: echo ${{ steps.latest_version.outputs.release }}
 
       - name: Docker meta
         id: meta
@@ -65,7 +65,7 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
         env:
-          version: ${{ steps.get_version.outputs.VERSION }}
+          version: ${{ steps.get_version.outputs.release }}
 
       - name: Test Docker Image
         uses: docker/build-push-action@v3
@@ -74,7 +74,7 @@ jobs:
           load: true
           tags: ${{ env.IMAGE }}:test
         env:
-          VERSION: ${{ steps.get_version.outputs.VERSION }}
+          VERSION: ${{ steps.get_version.outputs.release }}
 
       - name: Remove Docker Container
         run: |
@@ -86,10 +86,10 @@ jobs:
           context: .
           platforms: linux/amd64, linux/arm64
           push: true
-          tags: ${{ env.IMAGE }}:latest, ${{ env.IMAGE }}:${{ steps.get_version.outputs.VERSION }}
+          tags: ${{ env.IMAGE }}:latest, ${{ env.IMAGE }}:${{ steps.get_version.outputs.release }}
           labels: ${{ steps.meta.outputs.labels }}
         env:
-          VERSION: ${{ steps.get_version.outputs.VERSION }}
+          VERSION: ${{ steps.get_version.outputs.release }}
 
       - name: Update repo description
         uses: peter-evans/dockerhub-description@v2
