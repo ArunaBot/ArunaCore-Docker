@@ -1,6 +1,5 @@
-FROM node:gallium-slim
+FROM node:iron-slim
 ENV VERSION 1.0.0
-ENV BRANCH unstable
 
 LABEL name="ArunaCore"
 LABEL version=$VERSION
@@ -12,7 +11,7 @@ LABEL org.opencontainers.image.title="ArunaCore"
 LABEL org.opencontainers.image.description="ArunaCore is an open source websocket server made with nodejs for intercomunication between applications."
 LABEL org.opencontainers.image.licenses="GPL-3.0"
 
-HEALTHCHECK --interval=30s --timeout=5s CMD curl -f http://localhost:$PORT/healthCheck || exit 1
+HEALTHCHECK --interval=30s --timeout=5s CMD curl -f http://localhost:$PORT/healthcheck || exit 1
 
 # Add user early to get a consistent userid
 # - the root group so it can run with any uid
@@ -36,38 +35,29 @@ RUN \
 
 WORKDIR ${HOME}
 
+# Create ArunaCore directory
+RUN mkdir ArunaCore
+
+# Set the working directory to ArunaCore
+WORKDIR ${HOME}/ArunaCore
+
 # Download ArunaCore
-RUN curl -L https://github.com/ArunaBot/ArunaCore/archive/refs/heads/${BRANCH}.zip -o arunacore.zip
+RUN curl -L https://github.com/ArunaBot/ArunaCore/releases/latest/download/arunacore.zip -o arunacore.zip
 
 # Unzip ArunaCore
 RUN unzip arunacore.zip
 
-# Rename ArunaCore folder
-RUN mv ArunaCore-${BRANCH} ArunaCore
-
 # Delete ArunaCore.zip
 RUN rm arunacore.zip
-
-# Set the working directory to ArunaCore bundle
-WORKDIR ${HOME}/ArunaCore/bundle
-
-# Upgrade NPM
-RUN npm install -g npm@8.x
-
-# Setup ArunaCore
-RUN npm run cisetup
 
 # Set NODE_ENV to production
 ENV NODE_ENV=production
 
-# Run build cleanup tasks
-RUN npm run docker:cleanup
+# Upgrade NPM
+RUN npm install -g npm
 
-# Remove apt packages
-RUN apt-get remove -y unzip curl ca-certificates \
-    && apt-get autoremove -y \
-    && apt-get clean \
-    && apt-get autoclean
+# Setup ArunaCore
+RUN npm ci
 
 # Expose the port
 EXPOSE 3000/tcp
