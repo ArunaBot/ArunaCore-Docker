@@ -75,7 +75,7 @@ jobs:
 
       - name: Run Test Image
         run: |
-          docker run --env FINISH_IN_SECONDS=10 --rm ${{ env.IMAGE }}:test
+          docker run --env ARUNACORE_FINISH_IN_SECONDS=10 --rm ${{ env.IMAGE }}:test
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
