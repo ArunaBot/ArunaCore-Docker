@@ -6,4 +6,5 @@ LICENSE
 README.md
 SECURITY.md
 Dockerfile
+Dockerfile-alpine
 docker-compose

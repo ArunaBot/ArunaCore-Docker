@@ -1,12 +1,3 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# GitHub recommends pinning actions to a commit SHA.
-# To get a newer version, you will need to update the SHA.
-# You can also reference a tag or branch, but the action may change without warning.
-
 name: Publish Docker image
 
 on:
@@ -20,9 +11,20 @@ env:
   IMAGE: lobometalurgico/arunacore
 
 jobs:
-  publish-docker-image:
-    name: Push Docker image to Docker Hub
+  build-and-publish:
+    name: Build, test and publish Docker images
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        variant:
+          - name: slim
+            dockerfile: Dockerfile
+            tag-suffix: ""
+          - name: alpine
+            dockerfile: Dockerfile-alpine
+            tag-suffix: -alpine
+
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
@@ -39,7 +41,7 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Get latest arunacore version from github
+      - name: Get latest arunacore version from GitHub
         id: get_version
         uses: pozetroninc/github-action-get-latest-release@master
         with:
@@ -50,45 +52,49 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          # list of Docker images to use as base name for tags
-          images: |
-            ${{ env.IMAGE }}
-          # generate Docker tags based on the following events/attributes
+          images: ${{ env.IMAGE }}
           tags: |
-            type=schedule
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
+            type=semver,pattern={{version}}{{matrix.variant.tag-suffix}}
+            type=sha,prefix=,suffix={{matrix.variant.tag-suffix}}
         env:
           version: ${{ steps.get_version.outputs.release }}
 
-      - name: Generate Test Image
+      # === Build and test image ===
+      - name: Build image for testing
         uses: docker/build-push-action@v3
         with:
           context: .
+          file: ./${{ matrix.variant.dockerfile }}
           load: true
-          tags: ${{ env.IMAGE }}:test
+          tags: ${{ env.IMAGE }}:test-${{ matrix.variant.name }}
         env:
           VERSION: ${{ steps.get_version.outputs.release }}
 
-      - name: Run Test Image
+      - name: Run smoke test
         run: |
-          docker run --env ARUNACORE_FINISH_IN_SECONDS=10 --rm ${{ env.IMAGE }}:test
+          docker run --env ARUNACORE_FINISH_IN_SECONDS=10 --rm ${{ env.IMAGE }}:test-${{ matrix.variant.name }}
 
-      - name: Build and push Docker image
+      # === Push if tests pass ===
+      - name: Push production image
         uses: docker/build-push-action@v3
         with:
           context: .
-          platforms: linux/amd64, linux/arm64
+          file: ./${{ matrix.variant.dockerfile }}
+          platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.IMAGE }}:latest, ${{ env.IMAGE }}:${{ steps.get_version.outputs.release }}
+          tags: |
+            ${{ env.IMAGE }}${{ matrix.variant.tag-suffix == '' && ':latest' || matrix.variant.tag-suffix }}
+            ${{ env.IMAGE }}:${{ steps.get_version.outputs.release }}${{ matrix.variant.tag-suffix }}
           labels: ${{ steps.meta.outputs.labels }}
         env:
           VERSION: ${{ steps.get_version.outputs.release }}
 
+  # Atualiza descrição uma vez após builds
+  update-description:
+    name: Update Docker Hub description
+    needs: build-and-publish
+    runs-on: ubuntu-latest
+    steps:
       - name: Update repo description
         uses: peter-evans/dockerhub-description@v2
         with:
