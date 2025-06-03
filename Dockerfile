@@ -30,7 +30,7 @@ WORKDIR ${HOME}/ArunaCore
 RUN npm install -g npm
 
 # Fix a NPM bug with permissions
-RUN chown -R 100:101 ${HOME}/.npm || true
+RUN chown -R 999:999 ${HOME}/.npm || true
 
 RUN curl -L https://github.com/ArunaBot/ArunaCore/releases/latest/download/arunacore.zip -o arunacore.zip && \
     unzip arunacore.zip && rm arunacore.zip && \
