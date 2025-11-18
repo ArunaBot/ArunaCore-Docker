@@ -1,10 +1,52 @@
+# Git
 .git
 .github
+.gitignore
 .gitmodules
+
+# Docker
 .dockerignore
-LICENSE
-README.md
-SECURITY.md
 Dockerfile
 Dockerfile-alpine
-docker-compose
+docker-compose*
+docker-compose.yaml
+docker-compose.yml
+
+# Node
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+.pnpm-store
+
+# Builds
+dist
+build
+out
+
+# Env / Credenciais
+.env
+.env.*
+*.pem
+*.key
+*.crt
+
+# Tests / Dev tooling
+coverage
+nyc_output
+.vscode
+.idea
+*.swp
+*.swo
+*.tmp
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+
+# Docs
+README.md
+LICENSE
+SECURITY.md

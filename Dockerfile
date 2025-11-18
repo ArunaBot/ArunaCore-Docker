@@ -38,7 +38,7 @@ RUN curl -L https://github.com/ArunaBot/ArunaCore/releases/latest/download/aruna
 
 USER arunacore
 
-RUN npm ci
+RUN npm ci --omit=dev
 
 EXPOSE 3000/tcp
 
