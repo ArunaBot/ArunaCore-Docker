@@ -21,9 +21,11 @@ jobs:
           - name: slim
             dockerfile: Dockerfile
             tag-suffix: ""
+            release-name: latest
           - name: alpine
             dockerfile: Dockerfile-alpine
             tag-suffix: -alpine
+            release-name: alpine
 
     steps:
       - name: Check out the repo
@@ -83,7 +85,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ${{ env.IMAGE }}:latest${{ matrix.variant.tag-suffix }}
+            ${{ env.IMAGE }}:${{ matrix.variant.release-name }}
             ${{ env.IMAGE }}:${{ steps.get_version.outputs.release }}${{ matrix.variant.tag-suffix }}
           labels: ${{ steps.meta.outputs.labels }}
         env:
