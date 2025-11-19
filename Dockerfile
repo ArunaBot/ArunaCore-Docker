@@ -44,4 +44,4 @@ EXPOSE 3000/tcp
 
 HEALTHCHECK --interval=30s --timeout=5s CMD curl -f http://localhost:$PORT/healthcheck || exit 1
 
-CMD ["npm", "start"]
+CMD ["node", "--import=./arunacore/src/main/registerLoader.js", "arunacore/src/main/start.js"]
